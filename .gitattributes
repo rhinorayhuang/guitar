@@ -1,0 +1,2 @@
+# repo 內一律 LF（CI 在 Linux 上跑）；Windows 工作目錄由 Git 自動轉換
+* text=auto eol=lf

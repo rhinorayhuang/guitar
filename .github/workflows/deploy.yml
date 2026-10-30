@@ -1,0 +1,55 @@
+# 推到 main 時：跑測試 → 產生靜態網站 → 部署到 GitHub Pages
+# 首次使用前：repo Settings → Pages → Build and deployment → Source 選「GitHub Actions」
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同時只跑一個部署；新的推送會取消還在排隊的舊部署
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm test
+
+      - name: Generate static site
+        # 專案頁面的網址是 https://<帳號>.github.io/<repo>/，資源路徑要帶上 repo 名稱
+        run: npx nuxt generate
+        env:
+          NUXT_APP_BASE_URL: /${{ github.event.repository.name }}/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .output/public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
