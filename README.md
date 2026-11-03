@@ -4,6 +4,8 @@ Nuxt 4 + Vue 3 的吉他學習應用程式。
 
 ## 開發
 
+需要 Node `^22.22.3` 或 `^24.15.0`（Nuxt 4 的要求，Node 18/20 會在 `nuxt prepare` 失敗）。用 nvm 的話先在專案根目錄執行 `nvm use`，會讀 `.nvmrc`。
+
 ```bash
 npm install
 npm run dev     # http://localhost:3000
