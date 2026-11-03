@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { practicePlan } from '~/data/practice-plan'
+import { useNewStages } from '~/composables/useNewStages'
 import { useProgress } from '~/composables/useProgress'
 import { currentStageId } from '~/utils/progress'
 
@@ -7,6 +8,7 @@ useSeoMeta({ title: '吉他學習', description: '從第一個和弦開始的吉
 
 // P0-4：首頁顯示目前所在關卡（讀到 localStorage 之後才顯示）
 const { progress, loaded } = useProgress()
+const { newStageIds, dismiss: dismissNewStages } = useNewStages(progress, loaded)
 const current = computed(() => {
   if (!loaded.value) return null
   const id = currentStageId(practicePlan, progress.value)
@@ -19,6 +21,8 @@ const current = computed(() => {
   <section>
     <h1>從第一個和弦開始</h1>
     <p>依照練習進度一關一關學，每一關都有明確的過關標準。</p>
+
+    <NewStagesNotice :new-stage-ids="newStageIds" show-link @dismiss="dismissNewStages" />
 
     <div v-if="current" class="current card" data-testid="home-current-stage">
       <template v-if="current.stage">
@@ -38,7 +42,7 @@ const current = computed(() => {
     <ul>
       <li><NuxtLink to="/tuner">調音器</NuxtLink>：練習前先把吉他調準</li>
       <li><NuxtLink to="/chords">和弦圖鑑</NuxtLink>：開放和弦與封閉和弦的標準指法</li>
-      <li><NuxtLink to="/practice">練習進度</NuxtLink>：初學者 6 個階段</li>
+      <li><NuxtLink to="/practice">練習進度</NuxtLink>：初學者 {{ practicePlan.length }} 個關卡</li>
     </ul>
   </section>
 </template>

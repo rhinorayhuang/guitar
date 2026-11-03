@@ -5,6 +5,7 @@ import { chordById } from '~/data/chords'
 import { metronomeCopy } from '~/data/metronome-copy'
 import { practicePlan } from '~/data/practice-plan'
 import { useMetronome } from '~/composables/useMetronome'
+import { useNewStages } from '~/composables/useNewStages'
 import { useProgress } from '~/composables/useProgress'
 import { DEFAULT_BPM } from '~/utils/metronome/params'
 import { currentStageId, isStageCompleted } from '~/utils/progress'
@@ -14,6 +15,7 @@ useSeoMeta({ title: '練習進度' })
 const chordName = (id: string) => chordById(id)?.name ?? id
 
 const { progress, loaded, storageNotice, setCompleted, dismissNotice, exportBackup, importFromText } = useProgress()
+const { newStageIds, dismiss: dismissNewStages } = useNewStages(progress, loaded)
 // 讀到 localStorage 之前不標示「目前關卡」，避免 SSR 畫面先標第 1 關再跳走
 const current = computed(() => (loaded.value ? currentStageId(practicePlan, progress.value) : null))
 const done = (id: string) => isStageCompleted(progress.value, id)
@@ -83,6 +85,7 @@ onBeforeUnmount(() => {
       <button type="button" class="link" @click="dismissNotice">知道了</button>
     </p>
 
+    <NewStagesNotice :new-stage-ids="newStageIds" @dismiss="dismissNewStages" />
     <FingerCareNotice :minutes="currentMinutes" />
 
     <ol class="stages">
@@ -102,6 +105,8 @@ onBeforeUnmount(() => {
           目標 {{ stage.targetBpm }} BPM・每天 {{ stage.dailyMinutes }} 分鐘
         </p>
         <p class="completion"><strong>過關標準：</strong>{{ stage.completion }}</p>
+        <StrumPatternView v-if="stage.strumPattern" :pattern="stage.strumPattern" />
+        <SongSections v-if="stage.sections" :sections="stage.sections" :chord-name="chordName" />
         <ul class="tips">
           <li v-for="tip in stage.tips" :key="tip">{{ tip }}</li>
         </ul>
